@@ -1,6 +1,6 @@
 import Foundation
 
-struct Scene: Identifiable, Codable {
+struct GameScene: Identifiable, Codable {
     let id: UUID
     let characterName: String?
     let dialogue: String

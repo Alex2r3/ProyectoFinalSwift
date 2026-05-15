@@ -6,7 +6,7 @@ struct Story: Identifiable, Codable {
     let description: String
     let coverImage: String
     let initialSceneID: UUID
-    let scenes: [Scene]
+    let scenes: [GameScene]
     let genre: String
     let duration: String
 }

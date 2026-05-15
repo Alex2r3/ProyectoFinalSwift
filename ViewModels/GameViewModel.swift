@@ -3,9 +3,8 @@ import Combine
 
 class GameViewModel: ObservableObject {
     @Published var currentStory: Story?
-    @Published var currentScene: Scene?
+    @Published var currentScene: GameScene?
     
-    // Estadísticas
     @Published var trust: Int = 50
     @Published var bravery: Int = 50
     @Published var humanity: Int = 50
@@ -42,7 +41,7 @@ class GameViewModel: ObservableObject {
         }
     }
     
-    private func transitionToScene(_ scene: Scene) {
+    private func transitionToScene(_ scene: GameScene) {
         withAnimation(.easeInOut(duration: 0.8)) {
             self.currentScene = scene
         }
@@ -57,7 +56,6 @@ class GameViewModel: ObservableObject {
     private func determineEnding() {
         self.gameCompleted = true
         
-        // Lógica de los 5 Finales
         if humanity >= 80 && trust >= 70 {
             activeEndingTitle = "SACRIFICIO"
             activeEndingDescription = "Alex activa el faro para salvar a los demás, pero queda atrapado para siempre en sus engranajes de luz."
