@@ -14,7 +14,9 @@ class GameViewModel: ObservableObject {
     @Published var activeEndingDescription: String = ""
     
     @Published var timerValue: Double = 0
+    @Published var maxTimerValue: Double = 1.0
     @Published var isTimerActive: Bool = false
+    @Published var timeOutTriggered: Bool = false
     
     private var timerCancellable: AnyCancellable?
 
@@ -25,10 +27,22 @@ class GameViewModel: ObservableObject {
         self.bravery = 50
         self.humanity = 50
         self.gameCompleted = false
+        self.timeOutTriggered = false
+        
+        // Iniciar música si la historia define una por defecto
+        if let music = story.defaultMusic {
+            AudioManager.shared.playMusic(music)
+        }
+        
+        // Iniciar timer si la primera escena tiene opciones con límite de tiempo
+        if let scene = currentScene, let time = getSceneTimeLimit(scene) {
+            startTimer(seconds: time)
+        }
     }
     
     func makeChoice(_ choice: Choice) {
         stopTimer()
+        timeOutTriggered = false
         
         withAnimation(.spring()) {
             trust = max(0, min(100, trust + choice.trustImpact))
@@ -46,15 +60,26 @@ class GameViewModel: ObservableObject {
             self.currentScene = scene
         }
         
+        // Cambiar música si la escena define una diferente
+        if let music = scene.bgMusic {
+            AudioManager.shared.playMusic(music)
+        }
+        
         if scene.isEnding {
             determineEnding()
-        } else if let time = scene.choices.first(where: { $0.timeLimit != nil })?.timeLimit {
+        } else if let time = getSceneTimeLimit(scene) {
             startTimer(seconds: time)
         }
     }
     
+    /// Obtiene el límite de tiempo de la escena (del primer Choice que lo tenga)
+    private func getSceneTimeLimit(_ scene: GameScene) -> Double? {
+        return scene.choices.first(where: { $0.timeLimit != nil })?.timeLimit
+    }
+    
     private func determineEnding() {
         self.gameCompleted = true
+        AudioManager.shared.stopMusic()
         
         if humanity >= 80 && trust >= 70 {
             activeEndingTitle = "SACRIFICIO"
@@ -76,13 +101,17 @@ class GameViewModel: ObservableObject {
     
     func startTimer(seconds: Double) {
         timerValue = seconds
+        maxTimerValue = seconds
         isTimerActive = true
+        timeOutTriggered = false
         timerCancellable = Timer.publish(every: 0.1, on: .main, in: .common)
             .autoconnect()
-            .sink { _ in
+            .sink { [weak self] _ in
+                guard let self = self else { return }
                 if self.timerValue > 0 {
                     self.timerValue -= 0.1
                 } else {
+                    self.timerValue = 0
                     self.handleTimeOut()
                 }
             }
@@ -93,9 +122,45 @@ class GameViewModel: ObservableObject {
         timerCancellable?.cancel()
     }
     
+    /// Progreso del timer de 0.0 (tiempo lleno) a 1.0 (se acabó el tiempo)
+    var timerProgress: Double {
+        guard maxTimerValue > 0 else { return 0 }
+        return 1.0 - (timerValue / maxTimerValue)
+    }
+    
     private func handleTimeOut() {
-        if let randomChoice = currentScene?.choices.randomElement() {
-            makeChoice(randomChoice)
+        stopTimer()
+        timeOutTriggered = true
+        
+        // Reproducir efecto de sonido de timeout
+        AudioManager.shared.playSFX("time_out")
+        
+        // Buscar la peor opción (marcada como isWorstOption, o con peores impactos)
+        guard let scene = currentScene else { return }
+        let worstChoice = findWorstChoice(in: scene)
+        
+        // Esperar 1.5 segundos mostrando el mensaje y luego autoseleccionar
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+            guard let self = self else { return }
+            if let choice = worstChoice {
+                self.makeChoice(choice)
+            }
         }
+    }
+    
+    /// Encuentra la peor opción en una escena: primero busca la marcada con isWorstOption,
+    /// si no hay, elige la que tenga el impacto total más negativo.
+    private func findWorstChoice(in scene: GameScene) -> Choice? {
+        // Primero buscar opción marcada explícitamente como la peor
+        if let worst = scene.choices.first(where: { $0.isWorstOption == true }) {
+            return worst
+        }
+        
+        // Si no, buscar la que tenga el peor impacto total
+        return scene.choices.min(by: { totalImpact($0) < totalImpact($1) })
+    }
+    
+    private func totalImpact(_ choice: Choice) -> Int {
+        return choice.trustImpact + choice.braveryImpact + choice.humanityImpact
     }
 }

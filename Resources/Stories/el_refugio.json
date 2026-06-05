@@ -1,0 +1,217 @@
+{
+    "id": "el_refugio",
+    "title": "El Refugio",
+    "description": "Una tormenta te obligó a buscar refugio en una cabaña abandonada. Algo no está bien aquí.",
+    "coverImage": "refugio_cover",
+    "initialSceneID": "inicio",
+    "genre": "Terror",
+    "duration": "15 min",
+    "defaultMusic": "ambient_horror",
+    "scenes": [
+        {
+            "id": "inicio",
+            "characterName": "Tú",
+            "dialogue": "La tormenta ruge afuera. Has encontrado una cabaña vieja en medio del bosque. La puerta cruje al abrirse. Adentro, una vela parpadea sobre una mesa polvorienta. Hay un pasillo oscuro, una escalera al sótano y una puerta trasera que da al jardín.",
+            "backgroundImage": "cabin_entrance",
+            "bgMusic": "ambient_horror",
+            "choices": [
+                {
+                    "id": "ir_pasillo",
+                    "text": "Explorar el pasillo oscuro",
+                    "targetSceneID": "pasillo",
+                    "timeLimit": 15.0,
+                    "trustImpact": 0,
+                    "braveryImpact": 10,
+                    "humanityImpact": 0
+                },
+                {
+                    "id": "ir_sotano",
+                    "text": "Bajar al sótano",
+                    "targetSceneID": "sotano",
+                    "timeLimit": 15.0,
+                    "trustImpact": 0,
+                    "braveryImpact": 15,
+                    "humanityImpact": -5,
+                    "isWorstOption": true
+                },
+                {
+                    "id": "ir_jardin",
+                    "text": "Salir al jardín trasero",
+                    "targetSceneID": "jardin",
+                    "timeLimit": 15.0,
+                    "trustImpact": 5,
+                    "braveryImpact": 0,
+                    "humanityImpact": 5
+                }
+            ]
+        },
+        {
+            "id": "pasillo",
+            "characterName": "Tú",
+            "dialogue": "El pasillo está lleno de cuadros antiguos. Los ojos de los retratos parecen seguirte. Al final hay tres puertas: una con marcas de arañazos, otra entreabierta con luz tenue, y una última con un candado roto.",
+            "backgroundImage": "dark_hallway",
+            "bgMusic": "ambient_tension",
+            "choices": [
+                {
+                    "id": "puerta_arañazos",
+                    "text": "Abrir la puerta con arañazos",
+                    "targetSceneID": "final_bestia",
+                    "timeLimit": 12.0,
+                    "braveryImpact": 20,
+                    "humanityImpact": -10,
+                    "isWorstOption": true
+                },
+                {
+                    "id": "puerta_luz",
+                    "text": "Entrar por la puerta con luz",
+                    "targetSceneID": "final_superviviente",
+                    "timeLimit": 12.0,
+                    "trustImpact": 10,
+                    "humanityImpact": 15
+                },
+                {
+                    "id": "puerta_candado",
+                    "text": "Forzar la puerta del candado roto",
+                    "targetSceneID": "final_secreto",
+                    "timeLimit": 12.0,
+                    "braveryImpact": 15,
+                    "trustImpact": -5
+                }
+            ]
+        },
+        {
+            "id": "sotano",
+            "characterName": "Voz desconocida",
+            "dialogue": "Al bajar, una voz susurra: '¿También viniste a buscar lo que dejaron aquí?' Entre las sombras ves una figura encorvada junto a unas cajas. Puedes hablarle, intentar huir escaleras arriba, o buscar otra salida entre las cajas.",
+            "backgroundImage": "basement_dark",
+            "bgMusic": "ambient_dread",
+            "choices": [
+                {
+                    "id": "hablar_figura",
+                    "text": "Hablar con la figura misteriosa",
+                    "targetSceneID": "final_alianza",
+                    "timeLimit": 10.0,
+                    "trustImpact": 20,
+                    "humanityImpact": 10
+                },
+                {
+                    "id": "huir_escaleras",
+                    "text": "Huir escaleras arriba",
+                    "targetSceneID": "final_cobarde",
+                    "timeLimit": 10.0,
+                    "braveryImpact": -15,
+                    "humanityImpact": -5,
+                    "isWorstOption": true
+                },
+                {
+                    "id": "buscar_salida",
+                    "text": "Buscar otra salida entre las cajas",
+                    "targetSceneID": "final_tunel",
+                    "timeLimit": 10.0,
+                    "braveryImpact": 10,
+                    "trustImpact": 5
+                }
+            ]
+        },
+        {
+            "id": "jardin",
+            "characterName": "Tú",
+            "dialogue": "El jardín está cubierto de niebla espesa. Encuentras un pozo viejo, un cobertizo con la puerta abierta y un sendero que se pierde entre los árboles. La lluvia se intensifica.",
+            "backgroundImage": "foggy_garden",
+            "bgMusic": "ambient_rain",
+            "choices": [
+                {
+                    "id": "mirar_pozo",
+                    "text": "Asomarte al pozo",
+                    "targetSceneID": "final_pozo",
+                    "timeLimit": 12.0,
+                    "braveryImpact": 10,
+                    "humanityImpact": -10,
+                    "isWorstOption": true
+                },
+                {
+                    "id": "entrar_cobertizo",
+                    "text": "Entrar al cobertizo",
+                    "targetSceneID": "final_refugio",
+                    "timeLimit": 12.0,
+                    "trustImpact": 10,
+                    "humanityImpact": 10
+                },
+                {
+                    "id": "seguir_sendero",
+                    "text": "Seguir el sendero entre los árboles",
+                    "targetSceneID": "final_bosque",
+                    "timeLimit": 12.0,
+                    "braveryImpact": 15,
+                    "trustImpact": 5
+                }
+            ]
+        },
+        {
+            "id": "final_bestia",
+            "dialogue": "Detrás de la puerta encuentras una criatura encadenada. Te mira con ojos hambrientos. Las cadenas se rompen. No debiste abrir esa puerta.",
+            "backgroundImage": "creature_room",
+            "bgMusic": "ambient_horror",
+            "isEnding": true
+        },
+        {
+            "id": "final_superviviente",
+            "characterName": "Elena",
+            "dialogue": "Encuentras a una mujer herida. Se llama Elena. Juntos logran reparar la radio y pedir ayuda. Al amanecer, el helicóptero llega. Sobreviviste.",
+            "backgroundImage": "rescue_dawn",
+            "bgMusic": "ambient_relief",
+            "isEnding": true
+        },
+        {
+            "id": "final_secreto",
+            "dialogue": "Detrás del candado hay un laboratorio abandonado. Documentos revelan que esta cabaña era un centro de experimentos. Ahora sabes demasiado... pero también tienes la evidencia para exponer la verdad.",
+            "backgroundImage": "secret_lab",
+            "bgMusic": "ambient_tension",
+            "isEnding": true
+        },
+        {
+            "id": "final_alianza",
+            "characterName": "Marco",
+            "dialogue": "La figura se llama Marco. Lleva días atrapado aquí. Juntos descubren una salida secreta detrás de las cajas. La confianza entre desconocidos los salvó.",
+            "backgroundImage": "underground_exit",
+            "bgMusic": "ambient_relief",
+            "isEnding": true
+        },
+        {
+            "id": "final_cobarde",
+            "dialogue": "Subes corriendo las escaleras pero la puerta se cierra detrás de ti. Estás atrapado en la cabaña. La voz del sótano ríe. Debiste enfrentar tus miedos.",
+            "backgroundImage": "locked_cabin",
+            "bgMusic": "ambient_dread",
+            "isEnding": true
+        },
+        {
+            "id": "final_tunel",
+            "dialogue": "Entre las cajas encuentras un túnel excavado en la tierra. Después de arrastrarte por metros de oscuridad, sales al otro lado de la montaña. La tormenta quedó atrás. Eres libre.",
+            "backgroundImage": "tunnel_exit",
+            "bgMusic": "ambient_relief",
+            "isEnding": true
+        },
+        {
+            "id": "final_pozo",
+            "dialogue": "Te asomas al pozo y algo te jala hacia abajo. El agua está helada. Luchas por salir, pero las paredes son resbaladizas. La curiosidad mató al gato... y a ti también.",
+            "backgroundImage": "dark_well",
+            "bgMusic": "ambient_dread",
+            "isEnding": true
+        },
+        {
+            "id": "final_refugio",
+            "characterName": "Tú",
+            "dialogue": "El cobertizo tiene mantas, comida enlatada y una linterna. Alguien lo preparó como refugio de emergencia. Pasas la noche seguro. Al amanecer, la tormenta pasa y encuentras el camino a casa.",
+            "backgroundImage": "safe_shed",
+            "bgMusic": "ambient_relief",
+            "isEnding": true
+        },
+        {
+            "id": "final_bosque",
+            "dialogue": "El sendero te lleva a una carretera abandonada. Después de caminar horas bajo la lluvia, un camión se detiene. El conductor te lleva al pueblo más cercano. A veces el camino difícil es el correcto.",
+            "backgroundImage": "road_escape",
+            "bgMusic": "ambient_relief",
+            "isEnding": true
+        }
+    ]
+}

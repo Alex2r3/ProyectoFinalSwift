@@ -11,14 +11,30 @@ struct NarrativeView: View {
             // Fondo Cinematográfico
             VStack {
                 if let scene = viewModel.currentScene {
-                    ZStack {
-                        Rectangle().fill(Theme.darkGray)
-                        Text("IMAGEN: \(scene.backgroundImage)")
-                            .foregroundColor(.white.opacity(0.2))
-                    }
-                    .frame(maxHeight: .infinity)
-                    .ignoresSafeArea()
+                    getBackgroundImage(named: scene.backgroundImage)
                 }
+            }
+            
+            // Borde/Brillo rojo progresivo del temporizador
+            if viewModel.isTimerActive {
+                ZStack {
+                    // Viñeta roja en los bordes
+                    RadialGradient(
+                        gradient: Gradient(colors: [.clear, Color.red.opacity(0.55)]),
+                        center: .center,
+                        startRadius: 100,
+                        endRadius: 380
+                    )
+                    .ignoresSafeArea()
+                    
+                    // Borde rojo difuminado
+                    Rectangle()
+                        .strokeBorder(Theme.accentRed, lineWidth: 10)
+                        .blur(radius: 6)
+                        .ignoresSafeArea()
+                }
+                .opacity(viewModel.timerProgress)
+                .allowsHitTesting(false)
             }
             
             VStack {
@@ -30,20 +46,6 @@ struct NarrativeView: View {
                 }
                 .padding()
                 .background(Color.black.opacity(0.6))
-                
-                // Timer de decisión
-                if viewModel.isTimerActive {
-                    GeometryReader { geo in
-                        ZStack(alignment: .leading) {
-                            Rectangle().fill(Color.white.opacity(0.1))
-                            Rectangle()
-                                .fill(Theme.accentRed)
-                                .frame(width: geo.size.width * CGFloat(viewModel.timerValue / 5.0)) // Asumiendo 5s max
-                        }
-                    }
-                    .frame(height: 4)
-                    .padding(.horizontal)
-                }
                 
                 Spacer()
                 
@@ -112,7 +114,100 @@ struct NarrativeView: View {
                     }
                 }
             }
+            
+            // Overlay de tiempo agotado
+            if viewModel.timeOutTriggered {
+                ZStack {
+                    Color.black.opacity(0.8)
+                        .ignoresSafeArea()
+                    
+                    VStack(spacing: 20) {
+                        Image(systemName: "timer")
+                            .font(.system(size: 70))
+                            .foregroundColor(Theme.accentRed)
+                            .padding(.bottom, 10)
+                            
+                        Text("¡EL TIEMPO SE ACABÓ!")
+                            .font(.system(size: 32, weight: .black))
+                            .foregroundColor(Theme.accentRed)
+                            .tracking(2)
+                            
+                        Text("Se seleccionará automáticamente la peor opción...")
+                            .font(.subheadline)
+                            .foregroundColor(.white.opacity(0.7))
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(40)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color.black.opacity(0.95))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .stroke(Theme.accentRed.opacity(0.5), lineWidth: 2)
+                            )
+                    )
+                    .padding(30)
+                }
+                .transition(.opacity)
+                .zIndex(10)
+            }
         }
         .navigationBarHidden(true)
+        .onDisappear {
+            AudioManager.shared.stopMusic()
+        }
+    }
+    
+    @ViewBuilder
+    private func getBackgroundImage(named name: String) -> some View {
+        if let uiImage = UIImage(named: name) {
+            Image(uiImage: uiImage)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .ignoresSafeArea()
+        } else if let path = findImagePath(named: name) {
+            if let uiImage = UIImage(contentsOfFile: path) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .ignoresSafeArea()
+            } else {
+                defaultBackgroundPlaceholder(named: name)
+            }
+        } else {
+            defaultBackgroundPlaceholder(named: name)
+        }
+    }
+    
+    private func findImagePath(named name: String) -> String? {
+        let extensions = ["png", "jpg", "jpeg", "webp"]
+        for ext in extensions {
+            if let path = Bundle.main.path(forResource: name, ofType: ext, subdirectory: "Resources/Images") {
+                return path
+            }
+            if let path = Bundle.main.path(forResource: name, ofType: ext, subdirectory: "Images") {
+                return path
+            }
+        }
+        return nil
+    }
+    
+    private func defaultBackgroundPlaceholder(named name: String) -> some View {
+        ZStack {
+            Rectangle().fill(Theme.darkGray)
+            
+            VStack(spacing: 12) {
+                Image(systemName: "photo")
+                    .font(.system(size: 40))
+                    .foregroundColor(.white.opacity(0.15))
+                Text("Escena: \(name)")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.white.opacity(0.25))
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .ignoresSafeArea()
     }
 }
